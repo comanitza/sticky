@@ -1,19 +1,26 @@
 package ro.comanitza.sticky.service
 
-import org.junit.{Ignore, Test}
+import org.junit.{Before, Ignore, Test}
 import ro.comanitza.sticky.dto.User
 
 @Ignore
 class SqliteDaoTest {
 
-  @Test
-  def testTableCreation(): Unit = {
+  private val dao: Dao = new SqliteDao("D:\\sbin\\dbs\\sticky.db")
 
-    val dao: Dao = new SqliteDao("D:\\sbin\\dbs\\sticky.db")
+  @Before
+  def createTables(): Unit = {
 
+    println("creating tables... ")
     dao.createTables()
+  }
 
-    dao.createUser(new User(name = "gigel2", pass="shaorma", email = "gigi2@nsa.gov"))
+  @Test
+  def testInsertAndFetchUser(): Unit = {
+
+    //dao.createUser(new User(name = "gigel2", pass="shaorma", email = "gigi2@nsa.gov"))
+
+    println(dao.fetchUserByUsername("gigel2", "shaorma"))
 
   }
 }

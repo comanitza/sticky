@@ -43,10 +43,20 @@ class SqliteDao(private val dbPath: String) extends Dao {
 
       statement.executeUpdate(createUsersSql)
 
+      val createStickiesTable =
+        """CREATE TABLE IF NOT EXISTS stickies
+          (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+          content TEXT NOT NULL,
+          posX INTEGER NOT NULL,
+          posY INTEGER NOT NULL,
+          category TEXT DEFAULT 'default',
+          created DATETIME DEFAULT CURRENT_TIMESTAMP)""".stripMargin
+
+      statement.executeUpdate(createStickiesTable)
+
     } finally {
       SUtils.closeQuietly(statement)
     }
-
   }
 
   override def createUser(user: User): Either[Exception, Boolean] = {
@@ -56,9 +66,40 @@ class SqliteDao(private val dbPath: String) extends Dao {
     genericInsert(insertUser)
   }
 
-  override def fetchUserByUsername(userName: String): Either[Exception, User] = {
+  override def fetchUserByUsername(userName: String, pass: String): Either[Exception, Option[User]] = {
 
-    null
+    var statement: Statement = null
+
+    try {
+
+      statement = connection.createStatement()
+
+      val result = statement.executeQuery(s"SELECT * from users where name = '$userName' and pass = '$pass'")
+
+      if (result.next()) {
+        Right.apply(Some(new User(
+            id = result.getInt("id"),
+            name = result.getString("name"),
+            pass =  "",
+            email = result.getString("email"),
+            created = result.getLong("created"), lastLogin = result.getLong("lastLogin")
+          )
+        )
+      )
+      } else {
+        Right.apply(None)
+      }
+
+    } catch {
+      case e: Exception => {
+
+        log.error(s"Error fetching user $userName", e)
+
+        Left.apply(e)
+      }
+    } finally {
+      SUtils.closeQuietly(statement)
+    }
   }
 
   override def createSticky(sticky: Sticky): Either[Exception, Boolean] = ???
