@@ -3,7 +3,7 @@ import java.sql.{Connection, DriverManager, Statement}
 
 import org.slf4j.{Logger, LoggerFactory}
 import ro.comanitza.sticky.SUtils
-import ro.comanitza.sticky.dto.{Sticky, User}
+import ro.comanitza.sticky.dto.{Note, Sticky, User}
 
 /**
  *
@@ -46,6 +46,7 @@ class SqliteDao(private val dbPath: String) extends Dao {
       val createStickiesTable =
         """CREATE TABLE IF NOT EXISTS stickies
           (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+          userId INTEGER NOT NULL,
           content TEXT NOT NULL,
           posX INTEGER NOT NULL,
           posY INTEGER NOT NULL,
@@ -53,6 +54,16 @@ class SqliteDao(private val dbPath: String) extends Dao {
           created DATETIME DEFAULT CURRENT_TIMESTAMP)""".stripMargin
 
       statement.executeUpdate(createStickiesTable)
+
+      val createNotesTable =
+        """CREATE TABLE IF NOT EXISTS notes
+          (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+          stickyId INTEGER NOT NULL,
+          content TEXT NOT NULL,
+          created DATETIME DEFAULT CURRENT_TIMESTAMP
+          )""".stripMargin
+
+      statement.executeUpdate(createNotesTable)
 
     } finally {
       SUtils.closeQuietly(statement)
@@ -102,7 +113,12 @@ class SqliteDao(private val dbPath: String) extends Dao {
     }
   }
 
-  override def createSticky(sticky: Sticky): Either[Exception, Boolean] = ???
+  override def createSticky(sticky: Sticky, userId: Int): Either[Exception, Boolean] = {
+
+    val insertStickySql = s"insert into stickies (userId, content, posX, posY, category) values($userId, '${sticky.content}', ${sticky.posX}, ${sticky.posY}, '${sticky.category}')"
+
+    genericInsert(insertStickySql)
+  }
 
   override def fetchStickiesForUser(userId: Int): Either[Exception, List[Sticky]] = ???
 
@@ -131,5 +147,12 @@ class SqliteDao(private val dbPath: String) extends Dao {
     } finally {
       SUtils.closeQuietly(statement)
     }
+  }
+
+  override def createNote(note: Note, stickyId: Int): Either[Exception, Boolean] = {
+
+    val insertNoteSql = s"insert into notes (stickyId, content) values($stickyId, '${note.content}')"
+
+    genericInsert(insertNoteSql)
   }
 }

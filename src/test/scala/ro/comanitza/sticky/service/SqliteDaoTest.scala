@@ -1,7 +1,7 @@
 package ro.comanitza.sticky.service
 
 import org.junit.{Before, Ignore, Test}
-import ro.comanitza.sticky.dto.User
+import ro.comanitza.sticky.dto.{Note, Sticky, User}
 
 @Ignore
 class SqliteDaoTest {
@@ -21,6 +21,18 @@ class SqliteDaoTest {
     //dao.createUser(new User(name = "gigel2", pass="shaorma", email = "gigi2@nsa.gov"))
 
     println(dao.fetchUserByUsername("gigel2", "shaorma"))
+  }
+
+  @Test
+  def testInsertAndFetchSticky(): Unit = {
+
+    println(dao.createSticky(new Sticky(content = "gigi becali presedinte", posX = 20, posY = -10, category = "work"), 2))
+  }
+
+  @Test
+  def testInsertAndFetchNote(): Unit = {
+
+    dao.createNote(new Note(content = "this is my note, pac pac"), 1)
 
   }
 }
