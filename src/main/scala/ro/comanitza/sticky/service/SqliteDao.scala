@@ -1,9 +1,15 @@
 package ro.comanitza.sticky.service
-import java.sql.{Connection, DriverManager, Statement}
+import java.sql.{Connection, DriverManager, Statement, Timestamp}
+import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 import org.slf4j.{Logger, LoggerFactory}
 import ro.comanitza.sticky.SUtils
 import ro.comanitza.sticky.dto.{Note, Sticky, User}
+
+import scala.collection.mutable.ListBuffer
 
 /**
  *
@@ -17,6 +23,7 @@ class SqliteDao(private val dbPath: String) extends Dao {
   private val connection = createConnection()
 
   private val log: Logger = LoggerFactory.getLogger(classOf[SqliteDao])
+  private val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss").withLocale( Locale.US )
 
   private def createConnection (): Connection = {
     DriverManager.getConnection(s"jdbc:sqlite:$dbPath")
@@ -120,7 +127,67 @@ class SqliteDao(private val dbPath: String) extends Dao {
     genericInsert(insertStickySql)
   }
 
-  override def fetchStickiesForUser(userId: Int): Either[Exception, List[Sticky]] = ???
+  override def fetchStickiesForUser(userId: Int): Either[Exception, List[Sticky]] = {
+
+    var statement: Statement = null
+
+    try {
+
+      statement = connection.createStatement()
+
+      val result = statement.executeQuery(s"select s.* from stickies as s where s.userId = $userId")
+
+      val stickies = new ListBuffer[Sticky]()
+
+      while(result.next()) {
+
+        stickies += new Sticky(
+          id = result.getInt("id"),
+          content = result.getString("content"),
+          posX = result.getInt("posX"),
+          posY = result.getInt("posY"),
+          category = result.getString("category"),
+          created = Timestamp.valueOf(LocalDateTime.parse(result.getString("created"), dateTimeFormatter)).getTime
+        )
+      }
+
+      val stickyIdsAsString = stickies.map(s => s.id).toList.mkString(",")
+
+      val notesResult = statement.executeQuery(s"select * from notes where stickyId IN ($stickyIdsAsString)")
+
+      val notes = new ListBuffer[Note]()
+
+      while (notesResult.next()) {
+
+        notes += new Note(
+          id = notesResult.getInt("id"),
+          stickyId = notesResult.getInt("stickyId"),
+          content = notesResult.getString("content"),
+          created = Timestamp.valueOf(LocalDateTime.parse(result.getString("created"), dateTimeFormatter)).getTime
+        )
+      }
+
+      val notesAsMap = notes.groupBy(n => n.stickyId)
+
+      for (s <- stickies) {
+
+        if (notesAsMap.contains(s.id)) {
+          s.notes = notesAsMap(s.id).toList
+        }
+      }
+
+      Right.apply(stickies.toList)
+    } catch {
+      case e: Exception => {
+
+        log.error(s"Error fetching stickies for userId $userId", e)
+
+        Left.apply(e)
+      }
+    } finally {
+      SUtils.closeQuietly(statement)
+    }
+  }
 
   private def genericInsert(statementAsString: String): Either[Exception, Boolean] = {
 
@@ -149,10 +216,14 @@ class SqliteDao(private val dbPath: String) extends Dao {
     }
   }
 
-  override def createNote(note: Note, stickyId: Int): Either[Exception, Boolean] = {
+  override def createNote(note: Note): Either[Exception, Boolean] = {
 
-    val insertNoteSql = s"insert into notes (stickyId, content) values($stickyId, '${note.content}')"
+    val insertNoteSql = s"insert into notes (stickyId, content) values(${note.stickyId}, '${note.content}')"
 
     genericInsert(insertNoteSql)
+  }
+
+  class StickyAndNoteRow() {
+
   }
 }

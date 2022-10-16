@@ -26,13 +26,16 @@ class SqliteDaoTest {
   @Test
   def testInsertAndFetchSticky(): Unit = {
 
-    println(dao.createSticky(new Sticky(content = "gigi becali presedinte", posX = 20, posY = -10, category = "work"), 2))
+    //println(dao.createSticky(new Sticky(content = "gigi becali presedinte", posX = 20, posY = -10, category = "work"), 2))
+
+    val stickies = dao.fetchStickiesForUser(2)
+
+    stickies.foreach(println)
   }
 
   @Test
   def testInsertAndFetchNote(): Unit = {
 
-    dao.createNote(new Note(content = "this is my note, pac pac"), 1)
-
+    dao.createNote(new Note(content = "do this asap!", stickyId = 1))
   }
 }

@@ -18,5 +18,5 @@ trait Dao {
 
   def fetchStickiesForUser(userId: Int): Either[Exception, List[Sticky]]
 
-  def createNote(note: Note, stickyId: Int): Either[Exception, Boolean]
+  def createNote(note: Note): Either[Exception, Boolean]
 }
