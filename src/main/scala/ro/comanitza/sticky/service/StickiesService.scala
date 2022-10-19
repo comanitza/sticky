@@ -1,5 +1,5 @@
 package ro.comanitza.sticky.service
 
-class StickiesService {
+class StickiesService(dao: Dao) {
 
 }

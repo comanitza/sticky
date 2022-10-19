@@ -20,7 +20,7 @@ class SqliteDaoTest {
 
     //dao.createUser(new User(name = "gigel2", pass="shaorma", email = "gigi2@nsa.gov"))
 
-    println(dao.fetchUserByUsername("gigel2", "shaorma"))
+    println(dao.fetchUserByEmail("gigi2@nsa.gov", "shaorma"))
   }
 
   @Test

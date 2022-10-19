@@ -84,7 +84,7 @@ class SqliteDao(private val dbPath: String) extends Dao {
     genericInsert(insertUser)
   }
 
-  override def fetchUserByUsername(userName: String, pass: String): Either[Exception, Option[User]] = {
+  override def fetchUserByEmail(email: String, pass: String): Either[Exception, Option[User]] = {
 
     var statement: Statement = null
 
@@ -92,7 +92,7 @@ class SqliteDao(private val dbPath: String) extends Dao {
 
       statement = connection.createStatement()
 
-      val result = statement.executeQuery(s"SELECT * from users where name = '$userName' and pass = '$pass'")
+      val result = statement.executeQuery(s"SELECT * from users where email = '$email' and pass = '$pass'")
 
       if (result.next()) {
         Right.apply(Some(new User(
@@ -100,7 +100,8 @@ class SqliteDao(private val dbPath: String) extends Dao {
             name = result.getString("name"),
             pass =  "",
             email = result.getString("email"),
-            created = result.getLong("created"), lastLogin = result.getLong("lastLogin")
+            created = result.getLong("created"),
+            lastLogin = result.getLong("lastLogin")
           )
         )
       )
@@ -111,7 +112,7 @@ class SqliteDao(private val dbPath: String) extends Dao {
     } catch {
       case e: Exception => {
 
-        log.error(s"Error fetching user $userName", e)
+        log.error(s"Error fetching user $email", e)
 
         Left.apply(e)
       }
@@ -181,6 +182,31 @@ class SqliteDao(private val dbPath: String) extends Dao {
       case e: Exception => {
 
         log.error(s"Error fetching stickies for userId $userId", e)
+
+        Left.apply(e)
+      }
+    } finally {
+      SUtils.closeQuietly(statement)
+    }
+  }
+
+  def updateLastLogin(userId: Int): Either[Exception, Boolean] = {
+
+    var statement: Statement = null
+
+    try {
+
+      statement = connection.createStatement()
+
+      val sql = s"UPDATE users set lastLogin = CURRENT_TIMESTAMP where id=$userId"
+
+      statement.executeUpdate(sql)
+
+      log.info(s"### executing: $sql")
+
+      Right.apply(true)
+    } catch {
+      case e: Exception => {
 
         Left.apply(e)
       }
