@@ -47,6 +47,14 @@ class UsersService(dao: Dao) {
         }
       }
     }
+  }
 
+  def createUser (user: User): Either[String, Int] = {
+
+    dao.createUser(user) match {
+      case Right(id) => Right(id)
+      //todo handle here duplicate email address
+      case Left(ex) => Left("Incorrect user or pass")
+    }
   }
 }

@@ -18,7 +18,7 @@ class SqliteDaoTest {
   @Test
   def testInsertAndFetchUser(): Unit = {
 
-    //dao.createUser(new User(name = "gigel2", pass="shaorma", email = "gigi2@nsa.gov"))
+    dao.createUser(new User(pass="shaorma", email = "gigi2@nsa.gov"))
 
     println(dao.fetchUserByEmail("gigi2@nsa.gov", "shaorma"))
   }
@@ -26,7 +26,7 @@ class SqliteDaoTest {
   @Test
   def testInsertAndFetchSticky(): Unit = {
 
-    //println(dao.createSticky(new Sticky(content = "gigi becali presedinte", posX = 20, posY = -10, category = "work"), 2))
+    println(dao.createSticky(new Sticky(content = "in a year we swear, we will be billionairs", posX = 20, posY = -10, category = "work"), 2))
 
     val stickies = dao.fetchStickiesForUser(2)
 

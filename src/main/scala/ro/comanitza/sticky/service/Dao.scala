@@ -10,15 +10,15 @@ trait Dao {
 
   def createTables(): Unit
 
-  def createUser(user: User): Either[Exception, Boolean]
+  def createUser(user: User): Either[Exception, Int]
 
   def fetchUserByEmail(userName: String, pass: String): Either[Exception, Option[User]]
 
-  def createSticky(sticky: Sticky, userId: Int): Either[Exception, Boolean]
+  def createSticky(sticky: Sticky, userId: Int): Either[Exception, Int]
 
   def fetchStickiesForUser(userId: Int): Either[Exception, List[Sticky]]
 
-  def createNote(note: Note): Either[Exception, Boolean]
+  def createNote(note: Note): Either[Exception, Int]
 
   def updateLastLogin(userId: Int): Either[Exception, Boolean]
 }

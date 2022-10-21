@@ -1,10 +1,11 @@
 package ro.comanitza.sticky.service
 import java.sql.{Connection, DriverManager, Statement, Timestamp}
-import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import java.util.concurrent.locks.{Lock, ReentrantLock}
 
+import javax.annotation.PostConstruct
 import org.slf4j.{Logger, LoggerFactory}
 import ro.comanitza.sticky.SUtils
 import ro.comanitza.sticky.dto.{Note, Sticky, User}
@@ -25,8 +26,17 @@ class SqliteDao(private val dbPath: String) extends Dao {
   private val log: Logger = LoggerFactory.getLogger(classOf[SqliteDao])
   private val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss").withLocale( Locale.US )
 
+  private val lock: Lock = new ReentrantLock()
+
   private def createConnection (): Connection = {
     DriverManager.getConnection(s"jdbc:sqlite:$dbPath")
+  }
+
+  /**
+   * Dao init actions go here
+   */
+  def init(): Unit = {
+    createTables()
   }
 
   def createTables(): Unit = {
@@ -42,11 +52,10 @@ class SqliteDao(private val dbPath: String) extends Dao {
       val createUsersSql =
         """CREATE TABLE IF NOT EXISTS users
           (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-          name TEXT NOT NULL,
           pass TEXT NOT NULL,
           email TEXT  NOT NULL,
           created DATETIME  DEFAULT CURRENT_TIMESTAMP,
-          lastLogin DATETIME  DEFAULT NULL)""".stripMargin
+          lastLogin DATETIME  DEFAULT NULL, UNIQUE(email))""".stripMargin
 
       statement.executeUpdate(createUsersSql)
 
@@ -77,9 +86,9 @@ class SqliteDao(private val dbPath: String) extends Dao {
     }
   }
 
-  override def createUser(user: User): Either[Exception, Boolean] = {
+  override def createUser(user: User): Either[Exception, Int] = {
 
-    val insertUser = s"insert into users (name, pass, email) values('${user.name}', '${user.pass}', '${user.email}')"
+    val insertUser = s"insert into users (pass, email) values('${user.pass}', '${user.email}')"
 
     genericInsert(insertUser)
   }
@@ -97,7 +106,7 @@ class SqliteDao(private val dbPath: String) extends Dao {
       if (result.next()) {
         Right.apply(Some(new User(
             id = result.getInt("id"),
-            name = result.getString("name"),
+            name = "",
             pass =  "",
             email = result.getString("email"),
             created = result.getLong("created"),
@@ -121,7 +130,7 @@ class SqliteDao(private val dbPath: String) extends Dao {
     }
   }
 
-  override def createSticky(sticky: Sticky, userId: Int): Either[Exception, Boolean] = {
+  override def createSticky(sticky: Sticky, userId: Int): Either[Exception, Int] = {
 
     val insertStickySql = s"insert into stickies (userId, content, posX, posY, category) values($userId, '${sticky.content}', ${sticky.posX}, ${sticky.posY}, '${sticky.category}')"
 
@@ -215,10 +224,16 @@ class SqliteDao(private val dbPath: String) extends Dao {
     }
   }
 
-  private def genericInsert(statementAsString: String): Either[Exception, Boolean] = {
+  /**
+   *
+   * @param statementAsString
+   * @return
+   */
+  private def genericInsert(statementAsString: String): Either[Exception, Int] = {
 
     var statement: Statement = null
 
+    lock.lock()
     try {
 
       statement = connection.createStatement()
@@ -229,7 +244,15 @@ class SqliteDao(private val dbPath: String) extends Dao {
 
       log.info(s"### executing: $sql")
 
-      Right.apply(true)
+      val idResult = statement.executeQuery("select last_insert_rowid()")
+
+
+      var insertedId = -1
+      if (idResult.next()) {
+        insertedId = idResult.getInt(1)
+      }
+
+      Right.apply(insertedId)
     } catch {
       case e: Exception => {
 
@@ -239,10 +262,11 @@ class SqliteDao(private val dbPath: String) extends Dao {
       }
     } finally {
       SUtils.closeQuietly(statement)
+      lock.unlock()
     }
   }
 
-  override def createNote(note: Note): Either[Exception, Boolean] = {
+  override def createNote(note: Note): Either[Exception, Int] = {
 
     val insertNoteSql = s"insert into notes (stickyId, content) values(${note.stickyId}, '${note.content}')"
 

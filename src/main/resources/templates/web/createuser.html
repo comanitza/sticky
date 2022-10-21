@@ -1,1 +1,10 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org" lang="ro" xml:lang="ro">
+<body>
 my create user
+<span th:text="${errorMessage}"/>
+<form method="post" action="/createuseraction">
+    <input name="email" type="text"/>
+    <input name="pass" type="password"/>
+    <input type="submit"/>
+</form>

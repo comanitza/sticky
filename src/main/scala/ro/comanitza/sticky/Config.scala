@@ -9,7 +9,11 @@ class Config {
 
   @Bean
   def dao(@Value("${sticky.sqlite.file.path}") sqliteFilePath: String): Dao = {
-    new SqliteDao(sqliteFilePath)
+    val dao = new SqliteDao(sqliteFilePath)
+
+    dao.init()
+
+    dao
   }
 
   @Bean
