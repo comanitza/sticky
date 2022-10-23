@@ -1,1 +1,9 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org" lang="ro" xml:lang="ro">
+<body>
 my stickies
+<div>
+    <div th:each="s, iter: ${stickies}">
+        <span th:text="${s.content()}"/>
+    </div>
+</div>

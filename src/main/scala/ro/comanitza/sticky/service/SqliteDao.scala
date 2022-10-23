@@ -5,7 +5,6 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import java.util.concurrent.locks.{Lock, ReentrantLock}
 
-import javax.annotation.PostConstruct
 import org.slf4j.{Logger, LoggerFactory}
 import ro.comanitza.sticky.SUtils
 import ro.comanitza.sticky.dto.{Note, Sticky, User}
@@ -132,7 +131,7 @@ class SqliteDao(private val dbPath: String) extends Dao {
 
   override def createSticky(sticky: Sticky, userId: Int): Either[Exception, Int] = {
 
-    val insertStickySql = s"insert into stickies (userId, content, posX, posY, category) values($userId, '${sticky.content}', ${sticky.posX}, ${sticky.posY}, '${sticky.category}')"
+    val insertStickySql = if (sticky.category == null) s"insert into stickies (userId, content, posX, posY) values($userId, '${sticky.content}', ${sticky.posX}, ${sticky.posY})" else s"insert into stickies (userId, content, posX, posY, category) values($userId, '${sticky.content}', ${sticky.posX}, ${sticky.posY}, '${sticky.category}')"
 
     genericInsert(insertStickySql)
   }

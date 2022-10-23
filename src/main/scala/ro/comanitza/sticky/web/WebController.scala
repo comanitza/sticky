@@ -8,13 +8,16 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{GetMapping, PostMapping, RequestMapping, RequestParam}
 import org.springframework.web.servlet.ModelAndView
-import ro.comanitza.sticky.dto.User
-import ro.comanitza.sticky.service.UsersService
+import ro.comanitza.sticky.Constants
+import ro.comanitza.sticky.dto.{Sticky, User}
+import ro.comanitza.sticky.service.{StickiesService, UsersService}
+
+import collection.JavaConverters._
 
 @Controller
 @RequestMapping(path = Array("/"))
 @Autowired
-class WebController(private val usersService: UsersService) {
+class WebController(private val usersService: UsersService, private val stickiesService: StickiesService) {
 
   private val log: Logger = LoggerFactory.getLogger(classOf[WebController])
 
@@ -36,8 +39,7 @@ class WebController(private val usersService: UsersService) {
 
   @PostMapping(path = Array("createuseraction"))
   def createUserAction(@RequestParam(required = false) email: String, @RequestParam(required = false) pass: String, req: HttpServletRequest): ModelAndView = {
-
-
+    
     usersService.createUser(new User(email = email, pass = pass)) match {
       case Right(id) => {
 
@@ -45,6 +47,7 @@ class WebController(private val usersService: UsersService) {
          * log in the newly created user
          */
         usersService.performLogin(email, pass, req.getSession(true))
+        stickiesService.createSticky(stickyContent = "hello, welcome to stickies!", userId = id)
 
         new ModelAndView("web/stickies")
       }
@@ -60,8 +63,14 @@ class WebController(private val usersService: UsersService) {
   }
 
   @GetMapping(path = Array("stickies"))
-  def stickies(): ModelAndView = {
-    new ModelAndView("web/stickies")
+  def stickies(session: HttpSession): ModelAndView = {
+
+    val stickies = stickiesService.fetchAllStickiesForUser(session.getAttribute(Constants.USER_ID).asInstanceOf[Int])
+
+    val m = new util.HashMap[String, Any]()
+    m.put("stickies", stickies.asJava)
+
+    new ModelAndView("web/stickies", m)
   }
 
   @PostMapping(path = Array("loginaction"))

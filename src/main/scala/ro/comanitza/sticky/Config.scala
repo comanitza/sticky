@@ -11,6 +11,9 @@ class Config {
   def dao(@Value("${sticky.sqlite.file.path}") sqliteFilePath: String): Dao = {
     val dao = new SqliteDao(sqliteFilePath)
 
+    /**
+     * init the DAO
+     */
     dao.init()
 
     dao
