@@ -21,4 +21,6 @@ trait Dao {
   def createNote(note: Note): Either[Exception, Int]
 
   def updateLastLogin(userId: Int): Either[Exception, Boolean]
+
+  def countRowsInTable(tableName: String): Either[Exception, Int]
 }

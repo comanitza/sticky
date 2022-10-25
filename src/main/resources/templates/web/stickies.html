@@ -1,5 +1,9 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org" lang="ro" xml:lang="ro">
+<head>
+    <link rel="stylesheet" href="/static/sticky.css">
+    <script type="text/javascript" src="/static/sticky.js"></script>
+</head>
 <body>
 my stickies
 <div>
@@ -7,3 +11,16 @@ my stickies
         <span th:text="${s.content()}"/>
     </div>
 </div>
+
+<!-- Draggable DIV -->
+<div id="mydiv">
+    <!-- Include a header DIV with the same name as the draggable DIV, followed by "header" -->
+    <div id="mydivheader">Click here to move</div>
+    <p>Move</p>
+    <p>this</p>
+    <p>DIV</p>
+</div>
+
+<script>
+    dragElement(document.getElementById("mydiv"));
+</script>

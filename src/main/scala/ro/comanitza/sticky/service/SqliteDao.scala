@@ -275,4 +275,25 @@ class SqliteDao(private val dbPath: String) extends Dao {
   class StickyAndNoteRow() {
 
   }
+
+  override def countRowsInTable(tableName: String): Either[Exception, Int] = {
+
+    val statement: Statement = null
+
+    try {
+
+      val result = statement.executeQuery(s"select count(*) from $tableName")
+
+      var count = -1
+      if (result.next()) {
+        count = result.getInt(1)
+      }
+
+      Right.apply(count)
+    } catch {
+      case e: Exception => Left.apply(e)
+    }  finally {
+      SUtils.closeQuietly(statement)
+    }
+  }
 }

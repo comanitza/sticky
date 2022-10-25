@@ -49,7 +49,7 @@ class WebController(private val usersService: UsersService, private val stickies
         usersService.performLogin(email, pass, req.getSession(true))
         stickiesService.createSticky(stickyContent = "hello, welcome to stickies!", userId = id)
 
-        new ModelAndView("web/stickies")
+        new ModelAndView("redirect:/stickies")
       }
 
       case Left(errorMessage) => {
@@ -87,6 +87,6 @@ class WebController(private val usersService: UsersService, private val stickies
       return new ModelAndView("web/login", paramsMap)
     }
 
-    new ModelAndView("web/stickies")
+    new ModelAndView("redirect:/stickies")
   }
 }

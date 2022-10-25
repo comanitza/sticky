@@ -10,4 +10,5 @@ import ro.comanitza.sticky.service.{StickiesService, UsersService}
 @Autowired
 class AdminController(private val usersService: UsersService, private val stickiesService: StickiesService) {
 
+
 }
