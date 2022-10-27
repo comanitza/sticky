@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html xmlns:th="http://www.thymeleaf.org" lang="ro" xml:lang="ro">
+<html xmlns:th="http://www.thymeleaf.org" lang="en" xml:lang="en">
 <head>
     <link rel="stylesheet" href="/static/sticky.css">
     <script type="text/javascript" src="/static/sticky.js"></script>
@@ -7,20 +7,28 @@
 <body>
 my stickies
 <div>
-    <div th:each="s, iter: ${stickies}">
-        <span th:text="${s.content()}"/>
+    <div th:each="s, iter: ${stickies}" class="stickydiv" th:id="'sticky' + ${s.id()}">
+        <div class="stickyheader">Click here to move</div>
+        <div th:text="${s.content()}"/>
     </div>
 </div>
 
-<!-- Draggable DIV -->
-<div id="mydiv">
-    <!-- Include a header DIV with the same name as the draggable DIV, followed by "header" -->
-    <div id="mydivheader">Click here to move</div>
-    <p>Move</p>
-    <p>this</p>
-    <p>DIV</p>
-</div>
+<!--&lt;!&ndash; Draggable DIV &ndash;&gt;-->
+<!--<div id="mydiv" class="stickydiv">-->
+<!--    &lt;!&ndash; Include a header DIV with the same name as the draggable DIV, followed by "header" &ndash;&gt;-->
+<!--    <div id="mydivheader" class="stickyheader">Click here to move</div>-->
+<!--    <p>Move</p>-->
+<!--    <p>this</p>-->
+<!--    <p>DIV</p>-->
+<!--</div>-->
+
+<!--<script th:each="s, iter: ${stickies}">-->
+<!--    dragElement(document.getElementById("mydiv"));    -->
+<!--</script>-->
 
 <script>
-    dragElement(document.getElementById("mydiv"));
+    var stickies = document.getElementsByClassName("stickydiv");
+    for (var i = 0; i < stickies.length; i++) {
+       dragElement(stickies.item(i));
+    }
 </script>
