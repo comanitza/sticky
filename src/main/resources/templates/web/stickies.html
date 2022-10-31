@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="en" xml:lang="en">
 <head>
     <link rel="stylesheet" href="/static/sticky.css">
+    <script type="text/javascript" src="/static/jquery-3.5.1.min.js"></script>
     <script type="text/javascript" src="/static/sticky.js"></script>
 </head>
 <body>
@@ -25,6 +26,9 @@ my stickies
 <!--<script th:each="s, iter: ${stickies}">-->
 <!--    dragElement(document.getElementById("mydiv"));    -->
 <!--</script>-->
+
+<textarea id="addstickycontent"></textarea>
+<a href="javascript:createSticky();">create sticky</a>
 
 <script>
     var stickies = document.getElementsByClassName("stickydiv");

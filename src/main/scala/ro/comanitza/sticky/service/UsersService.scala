@@ -2,7 +2,6 @@ package ro.comanitza.sticky.service
 
 import javax.servlet.http.HttpSession
 import org.slf4j.{Logger, LoggerFactory}
-import org.springframework.web.servlet.ModelAndView
 import ro.comanitza.sticky.Constants
 import ro.comanitza.sticky.dto.User
 
@@ -12,7 +11,7 @@ import ro.comanitza.sticky.dto.User
  *
  * @author stefan.comanita
  */
-class UsersService(dao: Dao) {
+class UsersService(dao: Dao, exceptionService: ExceptionService) {
 
   private val log: Logger = LoggerFactory.getLogger(classOf[UsersService])
 
@@ -22,8 +21,9 @@ class UsersService(dao: Dao) {
       case Left(value) => {
 
         log.error("Error login in email {}", email: Any, value)
+        exceptionService.addException(value)
 
-        return false
+        false
       }
 
       case Right(value) => {
@@ -54,7 +54,12 @@ class UsersService(dao: Dao) {
     dao.createUser(user) match {
       case Right(id) => Right(id)
       //todo handle here duplicate email address
-      case Left(ex) => Left("Incorrect user or pass")
+      case Left(ex) =>  {
+
+        exceptionService.addException(ex)
+
+        Left("Incorrect user or pass")
+      }
     }
   }
 }

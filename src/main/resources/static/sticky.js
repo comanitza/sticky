@@ -40,3 +40,47 @@ function dragElement(elmnt) {
     document.onmousemove = null;
   }
 }
+
+function isStickyContentValid(stickyContent) {
+
+    if (stickyContent.length == 0) {
+        return false;
+    }
+
+    return true;
+}
+
+function createSticky() {
+
+    var stickyContent = $("#addstickycontent").val();
+
+    //todo do some checks
+
+    if (!isStickyContentValid(stickyContent)) {
+
+        alert("content not valid");
+
+        return
+    }
+
+        $.ajax({
+            url: "/rest/createsticky",
+            type: "POST",
+            dataType: "json",
+            data: '{"content":"'+ stickyContent +'","category":"default"}',
+            contentType: "application/json",
+                    success: function(data, textStatus, jqXHR)
+                    {
+                          var stickyId = "sticky" + data;
+
+                          var txt2 = $('<div class="stickydiv" id="' + stickyId + '"><div class="stickyheader">Click here to move</div><div>' + stickyContent + '</div></div>');
+                          $("body").append(txt2);
+                          dragElement(document.getElementById(stickyId));
+
+                    },
+                    error: function (jqXHR, textStatus, errorThrown)
+                    {
+
+                    }
+        });
+}
