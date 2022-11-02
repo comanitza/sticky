@@ -9,7 +9,7 @@
 my stickies
 <div>
     <div th:each="s, iter: ${stickies}" class="stickydiv" th:id="'sticky' + ${s.id()}">
-        <div class="stickyheader">Click here to move</div>
+        <div class="stickyheader">Click here to move <a th:href="@{javascript:deleteSticky({id});(id=${s.id()})}">[X]</a></div>
         <div th:text="${s.content()}"/>
     </div>
 </div>

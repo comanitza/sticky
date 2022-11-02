@@ -23,4 +23,6 @@ trait Dao {
   def updateLastLogin(userId: Int): Either[Exception, Boolean]
 
   def countRowsInTable(tableName: String): Either[Exception, Int]
+
+  def deleteSticky(userId: Int, stickyId: Int): Either[Exception, Boolean]
 }

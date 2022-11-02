@@ -21,4 +21,8 @@ class StickiesService(dao: Dao) {
     }
   }
 
+  def deleteSticky(userId: Int, stickyId: Int): Either[Exception, Boolean] = {
+
+    dao.deleteSticky(userId, stickyId)
+  }
 }

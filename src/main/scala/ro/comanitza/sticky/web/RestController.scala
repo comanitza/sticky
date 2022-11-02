@@ -56,6 +56,23 @@ class RestController(stickiesService: StickiesService, exceptionService: Excepti
     List.empty
   }
 
+  @GetMapping(path = Array("deleteStickies", "deletestickies"))
+  def deleteSticky(@RequestParam stickyId: Int, session: HttpSession): ResponseEntity[String] = {
+
+
+      stickiesService.deleteSticky(session.getAttribute(Constants.USER_ID).asInstanceOf[Int], stickyId) match {
+        case Right(value) => ResponseEntity.status(HttpStatus.OK).body("sticky was deleted")
+
+        case Left(e) => {
+          exceptionService.addException(e)
+
+          log.error("Error deleting sticky", e)
+
+          ResponseEntity.status(HttpStatus.BAD_REQUEST).body(String.valueOf(e.getMessage))
+        }
+      }
+  }
+
   private def createObjectMapper(): ObjectMapper = {
 
     val mapper = new ObjectMapper()

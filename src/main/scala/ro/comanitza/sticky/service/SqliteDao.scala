@@ -278,9 +278,11 @@ class SqliteDao(private val dbPath: String) extends Dao {
 
   override def countRowsInTable(tableName: String): Either[Exception, Int] = {
 
-    val statement: Statement = null
+    var statement: Statement = null
 
     try {
+
+      statement = connection.createStatement()
 
       val result = statement.executeQuery(s"select count(*) from $tableName")
 
@@ -293,6 +295,27 @@ class SqliteDao(private val dbPath: String) extends Dao {
     } catch {
       case e: Exception => Left.apply(e)
     }  finally {
+      SUtils.closeQuietly(statement)
+    }
+  }
+
+  override def deleteSticky(userId: Int, stickyId: Int): Either[Exception, Boolean] = {
+
+    var statement: Statement = null
+    try {
+
+      statement = connection.createStatement()
+
+      statement.executeUpdate(s"delete from stickies where userId=$userId and id=$stickyId")
+
+      Right.apply(true)
+    } catch {
+      case e: Exception => {
+
+        log.error("Error deleting sticky", e)
+        Left.apply(e)
+      }
+    } finally {
       SUtils.closeQuietly(statement)
     }
   }

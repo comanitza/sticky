@@ -63,24 +63,50 @@ function createSticky() {
         return
     }
 
-        $.ajax({
-            url: "/rest/createsticky",
-            type: "POST",
-            dataType: "json",
-            data: '{"content":"'+ stickyContent +'","category":"default"}',
-            contentType: "application/json",
-                    success: function(data, textStatus, jqXHR)
-                    {
-                          var stickyId = "sticky" + data;
+    $.ajax({
+        url: "/rest/createsticky",
+        type: "POST",
+        dataType: "json",
+        data: '{"content":"'+ stickyContent +'","category":"default"}',
+        contentType: "application/json",
+                success: function(data, textStatus, jqXHR)
+                {
+                      var stickyId = "sticky" + data;
 
-                          var txt2 = $('<div class="stickydiv" id="' + stickyId + '"><div class="stickyheader">Click here to move</div><div>' + stickyContent + '</div></div>');
-                          $("body").append(txt2);
-                          dragElement(document.getElementById(stickyId));
+                      var txt2 = $('<div class="stickydiv" id="' + stickyId + '"><div class="stickyheader">Click here to move <a href="javascript:deleteSticky(' + data + ');">[X]</a></div><div>' + stickyContent + '</div></div>');
+                      $("body").append(txt2);
+                      dragElement(document.getElementById(stickyId));
 
-                    },
-                    error: function (jqXHR, textStatus, errorThrown)
-                    {
+                },
+                error: function (jqXHR, textStatus, errorThrown)
+                {
 
-                    }
-        });
+                }
+    });
+}
+
+function deleteSticky(sId) {
+
+    var confirmAction = confirm("Are you sure to execute this action?");
+
+    if (!confirmAction) {
+        return;
+    }
+
+    $.ajax({
+      url: "/rest/deletestickies",
+      type: "get",
+      data: {
+        stickyId: sId
+      },
+      success: function(response) {
+        var stickyId = "sticky" + sId;
+
+        $('#' + stickyId).hide("slow", function(){ $(this).remove(); })
+
+      },
+      error: function(xhr) {
+        alert("could not delete sticky, please try again or refresh");
+      }
+    });
 }
