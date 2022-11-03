@@ -62,7 +62,7 @@ class WebController(private val usersService: UsersService, private val stickies
     }
   }
 
-  @GetMapping(path = Array("stickies"))
+  @GetMapping(path = Array("stickies", "sticky"))
   def stickies(session: HttpSession): ModelAndView = {
 
     val stickies = stickiesService.fetchAllStickiesForUser(session.getAttribute(Constants.USER_ID).asInstanceOf[Int])

@@ -33,6 +33,10 @@ my stickies
 <script>
     var stickies = document.getElementsByClassName("stickydiv");
     for (var i = 0; i < stickies.length; i++) {
-       dragElement(stickies.item(i));
+       var el = stickies.item(i)
+       dragElement(el);
+
+       el.style.left = 200 + 'px';
+       el.style.top = 200 + 'px';
     }
 </script>
