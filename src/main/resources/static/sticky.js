@@ -19,6 +19,8 @@ function dragElement(elmnt) {
     document.onmouseup = closeDragElement;
     // call a function whenever the cursor moves:
     document.onmousemove = elementDrag;
+
+//    document.mousemoveend = alert('end!');
   }
 
   function elementDrag(e) {
@@ -109,4 +111,34 @@ function deleteSticky(sId) {
         alert("could not delete sticky, please try again or refresh");
       }
     });
+}
+
+function moveSticky(sId) {
+
+    alert('move sticky ' + sId);
+
+    var stickyId = 'sticky' + sId;
+
+    var el = document.getElementById(stickyId)
+
+    var newPosX = el.style.left.replace("px", "");
+    var newPosY = el.style.top.replace("px", "");
+
+        $.ajax({
+          url: "/rest/movesticky",
+          type: "get",
+          data: {
+            stickyId: sId,
+            posX: newPosX,
+            posY: newPosY
+          },success: function(response) {
+//                   var stickyId = "sticky" + sId;
+//
+//                   $('#' + stickyId).hide("slow", function(){ $(this).remove(); })
+
+                 },
+          error: function(xhr) {
+            alert("could not move sticky, please try again or refresh");
+          }
+        });
 }

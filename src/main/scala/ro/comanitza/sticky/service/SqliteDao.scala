@@ -319,4 +319,27 @@ class SqliteDao(private val dbPath: String) extends Dao {
       SUtils.closeQuietly(statement)
     }
   }
+
+  override def moveSticky(userId: Int, stickyId: Int, posX: Int, posY: Int): Either[Exception, Boolean] = {
+
+   var statement: Statement = null
+
+   try {
+
+     statement = connection.createStatement()
+
+     statement.executeUpdate(s"update stickies set posX=$posX, posY=$posY where userId=$userId and id=$stickyId")
+
+    Right(true)
+   } catch {
+     case e: Exception => {
+
+
+       log.error("Error moving sticky {}", stickyId, e)
+       Left.apply(e)
+     }
+   } finally {
+     SUtils.closeQuietly(statement)
+   }
+  }
 }

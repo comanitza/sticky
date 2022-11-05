@@ -8,9 +8,11 @@
 <body>
 my stickies
 <div>
-    <div th:each="s, iter: ${stickies}" class="stickydiv" th:id="'sticky' + ${s.id()}">
+    <div th:each="s, iter: ${stickies}" class="stickydiv" th:onmouseup="@{moveSticky({id});(id=${s.id()})}" th:id="'sticky' + ${s.id()}">
         <div class="stickyheader">Click here to move <a th:href="@{javascript:deleteSticky({id});(id=${s.id()})}">[X]</a></div>
         <div th:text="${s.content()}"/>
+        <input type="hidden" th:value="${s.posX()}" th:attr="id='posXsticky' + ${s.id()}"/>
+        <input type="hidden" th:value="${s.posY()}" th:attr="id='posYsticky' + ${s.id()}"/>
     </div>
 </div>
 
@@ -33,10 +35,10 @@ my stickies
 <script>
     var stickies = document.getElementsByClassName("stickydiv");
     for (var i = 0; i < stickies.length; i++) {
-       var el = stickies.item(i)
+       var el = stickies.item(i);
        dragElement(el);
 
-       el.style.left = 200 + 'px';
-       el.style.top = 200 + 'px';
+       el.style.left = $('#posX' + el.id).val() + 'px';
+       el.style.top = $('#posY' + el.id).val() + 'px';
     }
 </script>

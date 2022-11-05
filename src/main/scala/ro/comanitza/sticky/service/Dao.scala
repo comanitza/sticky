@@ -25,4 +25,6 @@ trait Dao {
   def countRowsInTable(tableName: String): Either[Exception, Int]
 
   def deleteSticky(userId: Int, stickyId: Int): Either[Exception, Boolean]
+
+  def moveSticky(userId: Int, stickyId: Int, posX: Int, posY: Int): Either[Exception, Boolean]
 }

@@ -24,7 +24,6 @@ class RestController(stickiesService: StickiesService, exceptionService: Excepti
   @PostMapping(path = Array("createSticky", "createsticky"))
   def createSticky(@RequestParam(required = false) jsonPayLoad: Map[String, String], session: HttpSession, req: HttpServletRequest): ResponseEntity[String] = {
 
-
     try {
       val stickyPayload = mapper.readValue(req.getReader().lines().collect(Collectors.joining()), classOf[StickyPayload])
 
@@ -61,16 +60,33 @@ class RestController(stickiesService: StickiesService, exceptionService: Excepti
 
 
       stickiesService.deleteSticky(session.getAttribute(Constants.USER_ID).asInstanceOf[Int], stickyId) match {
-        case Right(value) => ResponseEntity.status(HttpStatus.OK).body("sticky was deleted")
+        case Right(value) => ResponseEntity.status(HttpStatus.OK).body(s"sticky $stickyId was deleted")
 
         case Left(e) => {
           exceptionService.addException(e)
 
-          log.error("Error deleting sticky", e)
+          log.error(s"Error deleting sticky $stickyId", e)
 
           ResponseEntity.status(HttpStatus.BAD_REQUEST).body(String.valueOf(e.getMessage))
         }
       }
+  }
+
+  @GetMapping(path = Array("moveSticky", "movesticky"))
+  def updateStickyPosition(@RequestParam stickyId: Int, @RequestParam posX: Int, @RequestParam posY: Int, session: HttpSession): ResponseEntity[String] = {
+
+    stickiesService.moveSticky(session.getAttribute(Constants.USER_ID).asInstanceOf[Int], stickyId, posX, posY) match {
+      case Right(value) => ResponseEntity.status(HttpStatus.OK).body(s"sticky $stickyId was moved")
+
+      case Left(e) => {
+
+        exceptionService.addException(e)
+
+        log.error(s"Error moving sticky $stickyId", e)
+
+        ResponseEntity.status(HttpStatus.BAD_REQUEST).body(String.valueOf(e.getMessage))
+      }
+    }
   }
 
   private def createObjectMapper(): ObjectMapper = {
@@ -88,5 +104,4 @@ class StickyPayload(val content: String, val category: String) {
   def this() {
     this(null, null)
   }
-
 }
