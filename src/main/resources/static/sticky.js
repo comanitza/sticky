@@ -13,31 +13,24 @@ function dragElement(elmnt) {
   function dragMouseDown(e) {
     e = e || window.event;
     e.preventDefault();
-    // get the mouse cursor position at startup:
     pos3 = e.clientX;
     pos4 = e.clientY;
     document.onmouseup = closeDragElement;
-    // call a function whenever the cursor moves:
     document.onmousemove = elementDrag;
-
-//    document.mousemoveend = alert('end!');
   }
 
   function elementDrag(e) {
     e = e || window.event;
     e.preventDefault();
-    // calculate the new cursor position:
     pos1 = pos3 - e.clientX;
     pos2 = pos4 - e.clientY;
     pos3 = e.clientX;
     pos4 = e.clientY;
-    // set the element's new position:
     elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
     elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
   }
 
   function closeDragElement() {
-    // stop moving when mouse button is released:
     document.onmouseup = null;
     document.onmousemove = null;
   }
@@ -75,15 +68,12 @@ function createSticky() {
                 {
                       var stickyId = "sticky" + data;
 
-                      var txt2 = $('<div class="stickydiv" id="' + stickyId + '"><div class="stickyheader">Click here to move <a href="javascript:deleteSticky(' + data + ');">[X]</a></div><div>' + stickyContent + '</div></div>');
+                      var txt2 = $('<div class="stickydiv" id="' + stickyId + '"  onmouseup="moveSticky(' + data + ');"><div class="stickyheader">Click here to move <a href="javascript:deleteSticky(' + data + ');">[X]</a></div><div>' + stickyContent + '</div></div>');
                       $("body").append(txt2);
                       dragElement(document.getElementById(stickyId));
 
                 },
-                error: function (jqXHR, textStatus, errorThrown)
-                {
-
-                }
+                error: function (jqXHR, textStatus, errorThrown) {}
     });
 }
 
@@ -115,8 +105,6 @@ function deleteSticky(sId) {
 
 function moveSticky(sId) {
 
-    alert('move sticky ' + sId);
-
     var stickyId = 'sticky' + sId;
 
     var el = document.getElementById(stickyId)
@@ -131,14 +119,9 @@ function moveSticky(sId) {
             stickyId: sId,
             posX: newPosX,
             posY: newPosY
-          },success: function(response) {
-//                   var stickyId = "sticky" + sId;
-//
-//                   $('#' + stickyId).hide("slow", function(){ $(this).remove(); })
-
-                 },
+          },success: function(response) {},
           error: function(xhr) {
-            alert("could not move sticky, please try again or refresh");
+            console.log("failed to move sticky " + sId)
           }
         });
 }

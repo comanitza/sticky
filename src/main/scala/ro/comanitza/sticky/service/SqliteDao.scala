@@ -94,39 +94,7 @@ class SqliteDao(private val dbPath: String) extends Dao {
 
   override def fetchUserByEmail(email: String, pass: String): Either[Exception, Option[User]] = {
 
-    var statement: Statement = null
-
-    try {
-
-      statement = connection.createStatement()
-
-      val result = statement.executeQuery(s"SELECT * from users where email = '$email' and pass = '$pass'")
-
-      if (result.next()) {
-        Right.apply(Some(new User(
-            id = result.getInt("id"),
-            name = "",
-            pass =  "",
-            email = result.getString("email"),
-            created = result.getLong("created"),
-            lastLogin = result.getLong("lastLogin")
-          )
-        )
-      )
-      } else {
-        Right.apply(None)
-      }
-
-    } catch {
-      case e: Exception => {
-
-        log.error(s"Error fetching user $email", e)
-
-        Left.apply(e)
-      }
-    } finally {
-      SUtils.closeQuietly(statement)
-    }
+    fetchUserByQuery(s"SELECT * from users where email = '$email' and pass = '$pass'")
   }
 
   override def createSticky(sticky: Sticky, userId: Int): Either[Exception, Int] = {
@@ -341,5 +309,47 @@ class SqliteDao(private val dbPath: String) extends Dao {
    } finally {
      SUtils.closeQuietly(statement)
    }
+  }
+
+  override def fetchGuestUserById(guestId: Int, pass: String): Either[Exception, Option[User]] = {
+
+    fetchUserByQuery(s"SELECT * from users where id = '$guestId' and pass = '$pass'")
+  }
+
+  private def fetchUserByQuery(query: String): Either[Exception, Option[User]] = {
+
+    var statement: Statement = null
+
+    try {
+
+      statement = connection.createStatement()
+
+      val result = statement.executeQuery(query)
+
+      if (result.next()) {
+        Right.apply(Some(new User(
+          id = result.getInt("id"),
+          name = "",
+          pass =  "",
+          email = result.getString("email"),
+          created = result.getLong("created"),
+          lastLogin = result.getLong("lastLogin")
+        )
+        )
+        )
+      } else {
+        Right.apply(None)
+      }
+
+    } catch {
+      case e: Exception => {
+
+        log.error(s"Error fetching user", e)
+
+        Left.apply(e)
+      }
+    } finally {
+      SUtils.closeQuietly(statement)
+    }
   }
 }

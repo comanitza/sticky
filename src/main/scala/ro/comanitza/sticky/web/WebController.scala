@@ -2,7 +2,7 @@ package ro.comanitza.sticky.web
 
 import java.util
 
-import javax.servlet.http.{HttpServletRequest, HttpSession}
+import javax.servlet.http.{Cookie, HttpServletRequest, HttpServletResponse, HttpSession}
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
@@ -10,14 +10,14 @@ import org.springframework.web.bind.annotation.{GetMapping, PostMapping, Request
 import org.springframework.web.servlet.ModelAndView
 import ro.comanitza.sticky.Constants
 import ro.comanitza.sticky.dto.{Sticky, User}
-import ro.comanitza.sticky.service.{StickiesService, UsersService}
+import ro.comanitza.sticky.service.{CookieGuestIdEncoder, CookiesService, StickiesService, UsersService}
 
 import collection.JavaConverters._
 
 @Controller
 @RequestMapping(path = Array("/"))
 @Autowired
-class WebController(private val usersService: UsersService, private val stickiesService: StickiesService) {
+class WebController(private val usersService: UsersService, private val stickiesService: StickiesService, cookiesService: CookiesService, cookieGuestIdEncoder: CookieGuestIdEncoder) {
 
   private val log: Logger = LoggerFactory.getLogger(classOf[WebController])
 
@@ -88,5 +88,48 @@ class WebController(private val usersService: UsersService, private val stickies
     }
 
     new ModelAndView("redirect:/stickies")
+  }
+
+  @GetMapping(Array("guest"))
+  def cookieLoginAction(req: HttpServletRequest, rsp: HttpServletResponse): ModelAndView = {
+
+    val cookieIdKey = "sticky.user.id"
+    val cookies = req.getCookies
+
+    val foundCookie = cookies.filter(c => cookieIdKey.equals(c.getName))
+
+    if (foundCookie.isEmpty) {
+
+      cookiesService.createCookieUser() match {
+        case Right(id) => {
+
+          val cookie = new Cookie(cookieIdKey, String.valueOf(cookieGuestIdEncoder.encodeGuestId(id)))
+          cookie.setMaxAge(365 * 24 * 60 * 60)
+
+          rsp.addCookie(cookie)
+
+          stickiesService.createSticky(stickyContent = "hello, welcome to stickies!", userId = id)
+
+          if (cookiesService.loginGuestUser(id, req.getSession(true))) {
+            new ModelAndView("redirect:/stickies")
+          } else {
+            new ModelAndView("redirect:/guesterror")
+          }
+
+          return new ModelAndView("redirect:/stickies")
+        }
+
+        case Left(value) => new ModelAndView("redirect:/guesterror")
+      }
+    }
+
+    val guestId = cookieGuestIdEncoder.decodeGuestId(foundCookie.head.getValue)
+
+    //todo increase the cookie max age
+    if (cookiesService.loginGuestUser(guestId, req.getSession(true))) {
+      new ModelAndView("redirect:/stickies")
+    } else {
+      new ModelAndView("redirect:/guesterror")
+    }
   }
 }

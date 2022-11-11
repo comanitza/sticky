@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.{Bean, Configuration}
 import ro.comanitza.sticky.filters.{LogInRedirectFilter, LogInRejectFilter}
-import ro.comanitza.sticky.service.{Dao, ExceptionService, SqliteDao, StickiesService, UsersService}
+import ro.comanitza.sticky.service.{CookieGuestIdEncoder, CookieGuestIdEncoderImpl, CookiesService, Dao, ExceptionService, SqliteDao, StickiesService, UsersService}
 
 @Configuration
 class Config {
@@ -63,5 +63,17 @@ class Config {
     registration.setOrder(2)
 
     registration
+  }
+
+  @Bean
+  @Autowired
+  def cookiesService(usersService: UsersService): CookiesService = {
+
+    new CookiesService(usersService)
+  }
+
+  @Bean
+  def cookieGuestIdEncoder(): CookieGuestIdEncoder = {
+    new CookieGuestIdEncoderImpl()
   }
 }

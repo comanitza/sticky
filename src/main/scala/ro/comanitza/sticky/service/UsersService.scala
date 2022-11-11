@@ -15,6 +15,11 @@ class UsersService(dao: Dao, exceptionService: ExceptionService) {
 
   private val log: Logger = LoggerFactory.getLogger(classOf[UsersService])
 
+  def performGuestLogin(guestId: Int, session: HttpSession): Boolean = {
+
+    performLoginBase(dao.fetchGuestUserById(guestId, "guestPass"), session)
+  }
+
   def performLogin(email: String, pass: String, session: HttpSession): Boolean = {
 
     dao.fetchUserByEmail(email, pass) match {
@@ -59,6 +64,40 @@ class UsersService(dao: Dao, exceptionService: ExceptionService) {
         exceptionService.addException(ex)
 
         Left("Incorrect user or pass")
+      }
+    }
+  }
+
+  private def performLoginBase(daoResult: Either[Exception, Option[User]], session: HttpSession): Boolean = {
+
+    daoResult match {
+      case Left(value) => {
+
+        log.error("Error login in", value)
+        exceptionService.addException(value)
+
+        false
+      }
+
+      case Right(value) => {
+
+        value match {
+          case Some(user) => {
+
+            session.setAttribute(Constants.LOGGED_IN, true)
+            session.setAttribute(Constants.USER_ID, user.id)
+            session.setAttribute(Constants.USER_EMAIL, user.email)
+
+            /**
+             * update the last login of the user
+             */
+            dao.updateLastLogin(user.id)
+
+            true
+          }
+
+          case None => false
+        }
       }
     }
   }
