@@ -7,7 +7,9 @@
 </head>
 <body>
 my stickies
-<div>
+<textarea id="addstickycontent"></textarea>
+<a href="javascript:createSticky();">create sticky</a>
+<div id="stickyworkspace">
     <div th:each="s, iter: ${stickies}" class="stickydiv" th:onmouseup="@{moveSticky({id});(id=${s.id()})}" th:id="'sticky' + ${s.id()}">
         <div class="stickyheader">Click here to move <a th:href="@{javascript:deleteSticky({id});(id=${s.id()})}">[X]</a></div>
         <div th:text="${s.content()}"/>
@@ -15,10 +17,6 @@ my stickies
         <input type="hidden" th:value="${s.posY()}" th:attr="id='posYsticky' + ${s.id()}"/>
     </div>
 </div>
-
-<textarea id="addstickycontent"></textarea>
-<a href="javascript:createSticky();">create sticky</a>
-
 <script>
     var stickies = document.getElementsByClassName("stickydiv");
     for (var i = 0; i < stickies.length; i++) {

@@ -13,3 +13,9 @@
   background-color: #2196F3;
   color: #fff;
 }
+
+#stickyworkspace {
+  height: 800px;
+  width: 1200px;
+  border: 1px solid #4CAF50;
+}

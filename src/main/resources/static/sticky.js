@@ -10,6 +10,7 @@ function dragElement(elmnt) {
     elmnt.onmousedown = dragMouseDown;
   }
 
+  //https://stackoverflow.com/questions/60163388/javascript-prevent-draggable-div-outside-parent-div
   function dragMouseDown(e) {
     e = e || window.event;
     e.preventDefault();
@@ -26,8 +27,23 @@ function dragElement(elmnt) {
     pos2 = pos4 - e.clientY;
     pos3 = e.clientX;
     pos4 = e.clientY;
-    elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
-    elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+    //todo pun aici bounds, haha
+
+    wantedTop = (elmnt.offsetTop - pos2);
+    wantedLeft = (elmnt.offsetLeft - pos1);
+
+    if (wantedTop > 780 || wantedLeft > 1140) {
+
+//        alert("can't move to " + wantedTop + " and " + wantedLeft);
+
+        elmnt.style.top = 760;
+        elmnt.style.left = 1120;
+
+        return
+    }
+
+    elmnt.style.top = wantedTop + "px";
+    elmnt.style.left = wantedLeft + "px";
   }
 
   function closeDragElement() {
@@ -69,7 +85,9 @@ function createSticky() {
                       var stickyId = "sticky" + data;
 
                       var txt2 = $('<div class="stickydiv" id="' + stickyId + '"  onmouseup="moveSticky(' + data + ');"><div class="stickyheader">Click here to move <a href="javascript:deleteSticky(' + data + ');">[X]</a></div><div>' + stickyContent + '</div></div>');
-                      $("body").append(txt2);
+//                      $("body").append(txt2);
+                      $("#stickyworkspace").append(txt2);
+//                      document.getElementById("stickyworkspace").append(txt2);
                       dragElement(document.getElementById(stickyId));
 
                 },
