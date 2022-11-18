@@ -132,4 +132,28 @@ class WebController(private val usersService: UsersService, private val stickies
       new ModelAndView("redirect:/guesterror")
     }
   }
+
+  @GetMapping(Array("letmein"))
+  def letMeIn(): ModelAndView = {
+
+    new ModelAndView("admin/letmein")
+  }
+
+  @PostMapping(path = Array("letmeinaction"))
+  def letMeInAction(@RequestParam(required = false) name: String, @RequestParam(required = false) pass: String, req: HttpServletRequest): ModelAndView = {
+
+    val session = req.getSession(true)
+
+    if ("admin".equals(name) && "foo".equals(pass)) {
+
+      session.setAttribute(Constants.ADMIN, true)
+
+      return new ModelAndView("redirect:/admin/stats")
+    }
+
+    val paramsMap = new util.HashMap[String, Any]()
+    paramsMap.put("errorMessage", "Wrong email or password.")
+
+    new ModelAndView("admin/letmein", paramsMap)
+  }
 }

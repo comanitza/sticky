@@ -4,7 +4,7 @@ import ro.comanitza.sticky.dto.Sticky
 
 import scala.util.Random
 
-class StickiesService(dao: Dao) {
+class StickiesService(dao: Dao, exceptionService: ExceptionService) {
 
   private val rand:Random = new Random()
 
@@ -29,5 +29,17 @@ class StickiesService(dao: Dao) {
   def moveSticky(userId: Int, stickyId: Int, posX: Int, posY: Int): Either[Exception, Boolean] = {
 
     dao.moveSticky(userId, stickyId, posX, posY)
+  }
+
+  def countStickies(): Int = {
+
+    dao.countRowsInTable("stickies") match {
+      case Right(value) => value
+      case Left(ex) => {
+        exceptionService.addException(ex)
+
+        -1
+      }
+    }
   }
 }

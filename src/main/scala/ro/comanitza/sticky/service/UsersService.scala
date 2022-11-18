@@ -68,6 +68,18 @@ class UsersService(dao: Dao, exceptionService: ExceptionService) {
     }
   }
 
+  def countUsers(): Int = {
+
+    dao.countRowsInTable("users") match {
+      case Right(value) => value
+      case Left(ex) => {
+        exceptionService.addException(ex)
+
+        -1
+      }
+    }
+  }
+
   private def performLoginBase(daoResult: Either[Exception, Option[User]], session: HttpSession): Boolean = {
 
     daoResult match {

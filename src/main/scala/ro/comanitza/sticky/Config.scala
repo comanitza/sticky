@@ -4,7 +4,7 @@ import javax.servlet.FilterRegistration
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.{Bean, Configuration}
-import ro.comanitza.sticky.filters.{LogInRedirectFilter, LogInRejectFilter}
+import ro.comanitza.sticky.filters.{AdminFilter, LogInRedirectFilter, LogInRejectFilter}
 import ro.comanitza.sticky.service.{CookieGuestIdEncoder, CookieGuestIdEncoderImpl, CookiesService, Dao, ExceptionService, SqliteDao, StickiesService, UsersService}
 
 @Configuration
@@ -35,8 +35,8 @@ class Config {
 
   @Bean
   @Autowired
-  def stickiesService(dao: Dao): StickiesService = {
-    new StickiesService(dao)
+  def stickiesService(dao: Dao, exceptionService: ExceptionService): StickiesService = {
+    new StickiesService(dao, exceptionService)
   }
 
   @Bean
@@ -59,6 +59,19 @@ class Config {
 
     registration.setFilter(new LogInRedirectFilter())
     registration.addUrlPatterns("/stickies", "/stickies/*", "/sticky", "/sticky/*")
+
+    registration.setOrder(2)
+
+    registration
+  }
+
+  @Bean
+  def adminFilterRegistration(): FilterRegistrationBean[AdminFilter] = {
+
+    val registration = new FilterRegistrationBean[AdminFilter]
+
+    registration.setFilter(new AdminFilter())
+    registration.addUrlPatterns("/admin", "/admin/*")
 
     registration.setOrder(2)
 
